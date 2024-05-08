@@ -48,11 +48,20 @@ async def helpp(event):
 
 @datgbot.on(events.NewMessage(incoming=True)) 
 async def _(event):
-    if event.is_private:  # From a private chat
-        tochnls = config("TO_CHANNEL", cast=int)  # Load channel ID from config
-    else:  # From one of the source channels ('frm')
+    message_id = event.id
+    chat_id = event.chat_id  # Simpan informasi pesan
+
+    if event.is_private:  # Jika dari chat pribadi
+        tochnls = config("TO_CHANNEL", cast=int)  # Ambil ID channel tujuan
+        message_text = event.text
+
+        # Hanya proses pesan teks dari chat pribadi
+        if message_text:
+            await process_message(message_id, chat_id, message_text, tochnls, event) 
+
+    else:  # Jika dari salah satu channel sumber ('frm')
         if event.chat_id not in frm:
-            return  # Ignore if not in the source channel list
+            return  # Abaikan jika bukan dari channel sumber
             
 
 
