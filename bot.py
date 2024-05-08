@@ -1,6 +1,4 @@
-import asyncio
 import logging
-import time
 from telethon import TelegramClient, events, Button
 from decouple import config
 
@@ -9,7 +7,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("ChannelAutoPost")
 
-# Start the bot
+# start the bot
 log.info("Starting...")
 try:
     apiid = config("APP_ID", cast=int)
@@ -24,8 +22,6 @@ except Exception as exc:
     log.error(exc)
     exit()
 
-# Task queue untuk memproses pesan secara asynchronous
-task_queue = asyncio.Queue()
 
 @datgbot.on(events.NewMessage(pattern="/start"))
 async def _(event):
@@ -46,58 +42,45 @@ async def helpp(event):
     )
 
 
-@datgbot.on(events.NewMessage(incoming=True)) 
+
+@datgbot.on(events.NewMessage(incoming=True))  # Menangkap pesan dari kedua sumber
 async def _(event):
-    message_id = event.id
-    chat_id = event.chat_id  # Simpan informasi pesan
-
-    if event.is_private:  # Jika dari chat pribadi
-        tochnls = config("TO_CHANNEL", cast=int)  # Ambil ID channel tujuan
-        message_text = event.text
-
-        # Hanya proses pesan teks dari chat pribadi
-        if message_text:
-            await process_message(message_id, chat_id, message_text, tochnls, event) 
-
-    else:  # Jika dari salah satu channel sumber ('frm')
+    if event.is_private:  # Dari chat pribadi
+        tochnls = config("TO_CHANNEL", cast=int)  # Memuat ID channel dari konfigurasi
+    else:  # Dari salah satu channel sumber ('frm')
         if event.chat_id not in frm:
-            return  # Abaikan jika bukan dari channel sumber
-            
+            return  # Abaikan jika bukan dari daftar channel sumber
 
-
-async def process_message(message_id, chat_id, message_text, tochnls, event):
-    for tochnl in tochnls:
-        try:
-            if event.poll:
-                continue
-            elif event.photo:
-                photo = event.media.photo
-                await datgbot.send_file(
-                    tochnl, photo, caption=message_text, link_preview=False
-                )
-            elif event.media:
-                try:
-                    if event.media.webpage:
-                        await datgbot.send_message(
-                            tochnl, message_text, link_preview=False
-                        )
-                except Exception:
-                    media = event.media.document
-                    await datgbot.send_file(
-                        tochnl, media, caption=message_text, link_preview=False
-                    )
-            else:
-                await datgbot.send_message(tochnl, message_text, link_preview=False)
-        except Exception as exc:
-            log.error(
-                f"TO_CHANNEL ID salah atau saya tidak dapat mengirim pesan di sana (jadikan saya admin). Message ID: {message_id} Chat ID: {chat_id}\nTraceback:\n{exc}"
+    try:
+        if event.poll:
+            return
+        elif event.photo:
+            photo = event.media.photo
+            await datgbot.send_file(
+                tochnls, photo, caption=event.text, link_preview=False
             )
+        elif event.media:
+            try:
+                if event.media.webpage:
+                    await datgbot.send_message(
+                        tochnls, event.text, link_preview=False
+                    )
+            except Exception:
+                media = event.media.document
+                await datgbot.send_file(
+                    tochnls, media, caption=event.text, link_preview=False
+                )
+            finally:
+                return
+        else:
+            await datgbot.send_message(tochnls, event.text, link_preview=False)
+    except Exception as exc:
+        log.error(
+            "ID TO_CHANNEL salah atau saya tidak dapat mengirim pesan di sana (jadikan saya admin).\nTraceback:\n%s",
+            exc,
+        )
 
 
-    message_id = event.id
-    chat_id = event
-    
-    
 log.info("Bot has started.")
 log.info("Do visit https://xditya.me !")
 datgbot.run_until_disconnected()
