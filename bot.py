@@ -46,6 +46,16 @@ async def helpp(event):
     )
 
 
+@datgbot.on(events.NewMessage(incoming=True)) 
+async def _(event):
+    if event.is_private:  # From a private chat
+        tochnls = config("TO_CHANNEL", cast=int)  # Load channel ID from config
+    else:  # From one of the source channels ('frm')
+        if event.chat_id not in frm:
+            return  # Ignore if not in the source channel list
+            
+
+
 async def process_message(message_id, chat_id, message_text, tochnls, event):
     for tochnl in tochnls:
         try:
