@@ -85,3 +85,6 @@ async def _(event):
 
     # Ambil informasi
     
+log.info("Bot has started.")
+log.info("Do visit https://xditya.me !")
+datgbot.run_until_disconnected()
