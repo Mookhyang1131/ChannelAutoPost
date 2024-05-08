@@ -46,7 +46,7 @@ async def helpp(event):
     )
 
 
-async def process_message(message_id, chat_id, message_text, tochnls):
+async def process_message(message_id, chat_id, message_text, tochnls, event):
     for tochnl in tochnls:
         try:
             if event.poll:
@@ -83,7 +83,9 @@ async def _(event):
         if event.chat_id not in frm:
             return  # Ignore if not in the source channel list
 
-    # Ambil informasi
+    message_id = event.id
+    chat_id = event
+    
     
 log.info("Bot has started.")
 log.info("Do visit https://xditya.me !")
