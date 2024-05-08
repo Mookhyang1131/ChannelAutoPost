@@ -91,7 +91,7 @@ async def _(event):
 @datgbot.on(events.NewMessage(incoming=True, chats=datgbot))  # Modify chats= 
 async def _(event):
     if event.is_private:  # Check if message is from a private chat
-        await datgbot.send_message(channel_id, event.message)
+        await datgbot.send_message(tochnls, event.message)
 
 
 log.info("Bot has started.")
