@@ -1,3 +1,2 @@
 python-decouple
-pyrogram
-tgcrypto
+telebot
