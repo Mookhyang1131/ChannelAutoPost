@@ -73,7 +73,11 @@ async def _(event):
                 "TO_CHANNEL ID is wrong or I can't send messages there (make me admin).\nTraceback:\n%s",
                 exc,
             )
-
+            
+@datgbot.on(events.NewMessage(incoming=True, chats=datgbot))  # Modify chats= 
+async def _(event):
+    if event.is_private:  # Check if message is from a private chat
+        await datgbot.send_message(channel_id, event.message)
 
 log.info("Bot has started.")
 log.info("Do visit https://xditya.me !")
