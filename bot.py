@@ -46,7 +46,7 @@ async def helpp(event):
 @datgbot.on(events.NewMessage(incoming=True))  # Menangkap pesan dari kedua sumber
 async def _(event):
     if event.is_private:  # Dari chat pribadi
-        channel_id = config("CHANNEL_ID", cast=int)  # Memuat ID channel dari konfigurasi
+        tochnls = config("TO_CHANNEL", cast=int)  # Memuat ID channel dari konfigurasi
     else:  # Dari salah satu channel sumber ('frm')
         if event.chat_id not in frm:
             return  # Abaikan jika bukan dari daftar channel sumber
@@ -57,23 +57,23 @@ async def _(event):
         elif event.photo:
             photo = event.media.photo
             await datgbot.send_file(
-                channel_id, photo, caption=event.text, link_preview=False
+                tochnls, photo, caption=event.text, link_preview=False
             )
         elif event.media:
             try:
                 if event.media.webpage:
                     await datgbot.send_message(
-                        channel_id, event.text, link_preview=False
+                        tochnls, event.text, link_preview=False
                     )
             except Exception:
                 media = event.media.document
                 await datgbot.send_file(
-                    channel_id, media, caption=event.text, link_preview=False
+                    tochnls, media, caption=event.text, link_preview=False
                 )
             finally:
                 return
         else:
-            await datgbot.send_message(channel_id, event.text, link_preview=False)
+            await datgbot.send_message(tochnls, event.text, link_preview=False)
     except Exception as exc:
         log.error(
             "ID TO_CHANNEL salah atau saya tidak dapat mengirim pesan di sana (jadikan saya admin).\nTraceback:\n%s",
