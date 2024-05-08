@@ -42,42 +42,44 @@ async def helpp(event):
     )
 
 
-@datgbot.on(events.NewMessage(incoming=True, chats=frm))
+
+@datgbot.on(events.NewMessage(incoming=True))  # Menangkap pesan dari kedua sumber
 async def _(event):
-    for tochnl in tochnls:
-        try:
-            if event.poll:
-                return
-            if event.photo:
-                photo = event.media.photo
-                await datgbot.send_file(
-                    tochnl, photo, caption=event.text, link_preview=False
-                )
-            elif event.media:
-                try:
-                    if event.media.webpage:
-                        await datgbot.send_message(
-                            tochnl, event.text, link_preview=False
-                        )
-                except Exception:
-                    media = event.media.document
-                    await datgbot.send_file(
-                        tochnl, media, caption=event.text, link_preview=False
-                    )
-                finally:
-                    return
-            else:
-                await datgbot.send_message(tochnl, event.text, link_preview=False)
-        except Exception as exc:
-            log.error(
-                "TO_CHANNEL ID is wrong or I can't send messages there (make me admin).\nTraceback:\n%s",
-                exc,
+    if event.is_private:  # Dari chat pribadi
+        channel_id = config("CHANNEL_ID", cast=int)  # Memuat ID channel dari konfigurasi
+    else:  # Dari salah satu channel sumber ('frm')
+        if event.chat_id not in frm:
+            return  # Abaikan jika bukan dari daftar channel sumber
+
+    try:
+        if event.poll:
+            return
+        elif event.photo:
+            photo = event.media.photo
+            await datgbot.send_file(
+                channel_id, photo, caption=event.text, link_preview=False
             )
-            
-@datgbot.on(events.NewMessage(incoming=True, chats=datgbot))  # Modify chats= 
-async def _(event):
-    if event.is_private:  # Check if message is from a private chat
-        await datgbot.send_message(channel_id, event.message)
+        elif event.media:
+            try:
+                if event.media.webpage:
+                    await datgbot.send_message(
+                        channel_id, event.text, link_preview=False
+                    )
+            except Exception:
+                media = event.media.document
+                await datgbot.send_file(
+                    channel_id, media, caption=event.text, link_preview=False
+                )
+            finally:
+                return
+        else:
+            await datgbot.send_message(channel_id, event.text, link_preview=False)
+    except Exception as exc:
+        log.error(
+            "ID TO_CHANNEL salah atau saya tidak dapat mengirim pesan di sana (jadikan saya admin).\nTraceback:\n%s",
+            exc,
+        )
+
 
 log.info("Bot has started.")
 log.info("Do visit https://xditya.me !")
